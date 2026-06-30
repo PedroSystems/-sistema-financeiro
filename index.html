@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Financeiro - FinControl</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-coins"></i>
+                    <span>FinControl</span>
+                </div>
+                <button class="toggle-sidebar" id="toggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-page="dashboard">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </li>
+                    <li class="nav-item" data-page="transactions">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Transações</span>
+                    </li>
+                    <li class="nav-item" data-page="categories">
+                        <i class="fas fa-tags"></i>
+                        <span>Categorias</span>
+                    </li>
+                    <li class="nav-item" data-page="goals">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Metas</span>
+                    </li>
+                    <li class="nav-item" data-page="reports">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Relatórios</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                    <span>Modo Escuro</span>
+                </button>
+                <button class="export-btn" id="exportBtn">
+                    <i class="fas fa-download"></i>
+                    <span>Exportar</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <span class="date-display" id="dateDisplay"></span>
+                </div>
+                <div class="header-right">
+                    <div class="balance-display">
+                        <span class="balance-label">Saldo Total</span>
+                        <span class="balance-value" id="totalBalance">R$ 0,00</span>
+                    </div>
+                    <button class="btn btn-primary" id="addTransactionBtn">
+                        <i class="fas fa-plus"></i>
+                        Nova Transação
+                    </button>
+                </div>
+            </header>
+
+            <!-- Pages -->
+            <div class="pages">
+                <!-- Dashboard -->
+                <section id="dashboard" class="page active">
+                    <div class="dashboard-grid">
+                        <div class="card summary-card">
+                            <div class="summary-icon income">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <div class="summary-info">
+                                <span class="summary-label">Receitas</span>
+                                <span class="summary-value" id="totalIncome">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="card summary-card">
+                            <div class="summary-icon expense">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="summary-info">
+                                <span class="summary-label">Despesas</span>
+                                <span class="summary-value" id="totalExpense">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="card summary-card">
+                            <div class="summary-icon balance">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="summary-info">
+                                <span class="summary-label">Saldo</span>
+                                <span class="summary-value" id="balance">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="card summary-card">
+                            <div class="summary-icon goals">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="summary-info">
+                                <span class="summary-label">Metas</span>
+                                <span class="summary-value" id="goalsProgress">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="card chart-card">
+                            <h3>Receitas vs Despesas</h3>
+                            <canvas id="incomeExpenseChart"></canvas>
+                        </div>
+                        <div class="card chart-card">
+                            <h3>Despesas por Categoria</h3>
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="card chart-card full-width">
+                            <h3>Evolução Financeira</h3>
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Transactions -->
+                <section id="transactions" class="page">
+                    <div class="transactions-controls">
+                        <div class="filters">
+                            <div class="filter-group">
+                                <select id="transactionType" class="filter-select">
+                                    <option value="all">Todos</option>
+                                    <option value="income">Receitas</option>
+                                    <option value="expense">Despesas</option>
+                                </select>
+                                <select id="transactionCategory" class="filter-select">
+                                    <option value="all">Todas Categorias</option>
+                                </select>
+                                <input type="date" id="transactionDateFrom" class="filter-input">
+                                <input type="date" id="transactionDateTo" class="filter-input">
+                            </div>
+                            <div class="search-group">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="transactionSearch" placeholder="Buscar transação...">
+                            </div>
+                        </div>
+                        <div class="transactions-actions">
+                            <button class="btn btn-secondary" id="exportExcelBtn">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                            <button class="btn btn-secondary" id="exportPDFBtn">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="transactions-list">
+                        <div class="transactions-header">
+                            <span>Data</span>
+                            <span>Descrição</span>
+                            <span>Categoria</span>
+                            <span>Tipo</span>
+                            <span>Valor</span>
+                            <span>Ações</span>
+                        </div>
+                        <div id="transactionsContainer">
+                            <!-- Transactions will be rendered here -->
+                        </div>
+                    </div>
+
+                    <div class="transactions-footer">
+                        <span id="transactionsCount">0 transações</span>
+                        <div class="pagination">
+                            <button class="page-btn" id="prevPage"><i class="fas fa-chevron-left"></i></button>
+                            <span id="pageInfo">Página 1</span>
+                            <button class="page-btn" id="nextPage"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Categories -->
+                <section id="categories" class="page">
+                    <div class="categories-header">
+                        <h2>Gerenciar Categorias</h2>
+                        <button class="btn btn-primary" id="addCategoryBtn">
+                            <i class="fas fa-plus"></i> Nova Categoria
+                        </button>
+                    </div>
+                    <div class="categories-grid" id="categoriesContainer">
+                        <!-- Categories will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- Goals -->
+                <section id="goals" class="page">
+                    <div class="goals-header">
+                        <h2>Metas Financeiras</h2>
+                        <button class="btn btn-primary" id="addGoalBtn">
+                            <i class="fas fa-plus"></i> Nova Meta
+                        </button>
+                    </div>
+                    <div class="goals-grid" id="goalsContainer">
+                        <!-- Goals will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- Reports -->
+                <section id="reports" class="page">
+                    <div class="reports-header">
+                        <h2>Relatórios</h2>
+                        <div class="reports-actions">
+                            <button class="btn btn-secondary" id="generateReportBtn">
+                                <i class="fas fa-sync"></i> Gerar Relatório
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reports-grid">
+                        <div class="card report-card">
+                            <h3>Resumo do Período</h3>
+                            <div class="report-summary">
+                                <div class="report-item">
+                                    <span>Total Receitas</span>
+                                    <strong id="reportIncome">R$ 0,00</strong>
+                                </div>
+                                <div class="report-item">
+                                    <span>Total Despesas</span>
+                                    <strong id="reportExpense">R$ 0,00</strong>
+                                </div>
+                                <div class="report-item">
+                                    <span>Saldo</span>
+                                    <strong id="reportBalance">R$ 0,00</strong>
+                                </div>
+                                <div class="report-item">
+                                    <span>Economia</span>
+                                    <strong id="reportSavings">0%</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card report-card">
+                            <h3>Top 5 Categorias de Despesas</h3>
+                            <div id="topCategoriesList" class="top-categories">
+                                <!-- Will be rendered -->
+                            </div>
+                        </div>
+                        <div class="card report-card full-width">
+                            <h3>Análise de Gastos</h3>
+                            <canvas id="reportChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Transactions -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="transactionModalTitle">Nova Transação</h2>
+                <button class="modal-close" id="closeTransactionModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label for="transactionDescription">Descrição</label>
+                        <input type="text" id="transactionDescription" placeholder="Digite a descrição" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transactionAmount">Valor</label>
+                            <input type="number" id="transactionAmount" placeholder="0,00" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionTypeSelect">Tipo</label>
+                            <select id="transactionTypeSelect" required>
+                                <option value="income">Receita</option>
+                                <option value="expense">Despesa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transactionCategorySelect">Categoria</label>
+                            <select id="transactionCategorySelect" required>
+                                <!-- Categories will be populated -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transactionDate">Data</label>
+                            <input type="date" id="transactionDate" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelTransaction">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Category -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">Nova Categoria</h2>
+                <button class="modal-close" id="closeCategoryModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Nome</label>
+                        <input type="text" id="categoryName" placeholder="Digite o nome da categoria" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryType">Tipo</label>
+                        <select id="categoryType" required>
+                            <option value="income">Receita</option>
+                            <option value="expense">Despesa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryIcon">Ícone (opcional)</label>
+                        <input type="text" id="categoryIcon" placeholder="fa-solid fa-tag">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelCategory">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Goal -->
+    <div class="modal" id="goalModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 id="goalModalTitle">Nova Meta</h2>
+                <button class="modal-close" id="closeGoalModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="goalForm">
+                    <div class="form-group">
+                        <label for="goalName">Nome da Meta</label>
+                        <input type="text" id="goalName" placeholder="Digite o nome da meta" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalTarget">Valor Alvo</label>
+                        <input type="number" id="goalTarget" placeholder="0,00" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalCurrent">Valor Atual</label>
+                        <input type="number" id="goalCurrent" placeholder="0,00" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDeadline">Prazo</label>
+                        <input type="date" id="goalDeadline" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelGoal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/transactions.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/goals.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/export.js"></script>
+</body>
+</html>
